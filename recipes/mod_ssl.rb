@@ -33,6 +33,8 @@ ports = node['apache']['listen_ports'].include?("443") ? node['apache']['listen_
 
 template "#{node['apache']['dir']}/ports.conf" do
   source "ports.conf.erb"
+  owner "root"
+  group node['apache']['root_group']
   variables :apache_listen_ports => ports.map{|p| p.to_i}.uniq
   notifies :restart, resources(:service => "apache2")
   mode 0644
