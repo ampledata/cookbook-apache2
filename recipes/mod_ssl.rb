@@ -29,13 +29,14 @@ if platform?("redhat", "centos", "scientific", "fedora", "amazon")
   end
 end
 
-ports = node['apache']['listen_ports'].include?("443") ? node['apache']['listen_ports'] : [node['apache']['listen_ports'], "443"].flatten
+ports = node['apache']['listen_ports'].include?("443") ? node['apache']['listen_ports'] : [node['apache']['listen_ports'], "443"].flatten.map{|p| p.to_i}.uniq
+Chef::Log.debug("COOK-1460 ports=#{ports}")
 
 template "#{node['apache']['dir']}/ports.conf" do
   source "ports.conf.erb"
   owner "root"
   group node['apache']['root_group']
-  variables :apache_listen_ports => ports.map{|p| p.to_i}.uniq
+  variables :apache_listen_ports => ports
   notifies :restart, resources(:service => "apache2")
   mode 0644
 end

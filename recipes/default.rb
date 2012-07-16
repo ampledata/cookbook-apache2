@@ -192,11 +192,14 @@ template "charset" do
   notifies :restart, resources(:service => "apache2")
 end
 
+template_ports = node['apache']['listen_ports'].map{|p| p.to_i}.uniq
+Chef::Log.debug("COOK-1460 template_ports=#{template_ports}")
+
 template "#{node['apache']['dir']}/ports.conf" do
   source "ports.conf.erb"
   owner "root"
   group node['apache']['root_group']
-  variables :apache_listen_ports => node['apache']['listen_ports'].map{|p| p.to_i}.uniq
+  variables :apache_listen_ports => template_ports
   mode 0644
   notifies :restart, resources(:service => "apache2")
 end
